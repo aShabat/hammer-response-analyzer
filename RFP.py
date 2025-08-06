@@ -1,9 +1,12 @@
 import numpy as np
 import scipy as sp
 
+# RFP is an algorithm from ./math/global_frequency_and_damping_estimates_from_frm.pdf, wich aplies algorithm from ./math/parameter_estimation_from_frm_using_rfp.pdf
+# to multiple measurements.
+
 
 def orthogonal_polynomials(omega, q, k):
-    # k up to 30
+    # k up to 30, or error becomes too big
     q = np.real(q)
 
     def qdot(left, right):
@@ -28,10 +31,13 @@ def orthogonal_polynomials(omega, q, k):
         s[i] = s[i] * np.real(1j**i / (1j ** np.arange(k + 1)))
     s = s.transpose()
 
-    # f -- orthogonal polynomials fow all omega, s -- transformation matrix
+    # f -- orthogonal polynomials for all omega, s -- transformation matrix
     return f, s
 
 
+# omega - array of frequencies, Hs = 3d array with first two dimensions relating to points where we apply and record signal. Along the third dimension we have recorded FRF.
+# m and n are assumed degrees of denominator and divisor of FRF. Number of modes = 2 * n. m >= n
+# Most matrix variable names are copied from ./math/parameter_estimation_from_frm_using_rfp.pdf.
 def rfp(omega, Hs, m, n):
     omegaMax = np.max(omega)
     omega = omega / omegaMax
@@ -70,6 +76,7 @@ def rfp(omega, Hs, m, n):
     return As, B, omegaMax
 
 
+# used for gradient descent when approximating amplitudes. isn't used now
 def rfp_error(omega, Hs, m, n):
     As, B, omegaMax = rfp(omega, Hs, m, n)
     rfpHs = np.sum(
@@ -86,6 +93,7 @@ def rfp_error(omega, Hs, m, n):
     return np.sum(np.nan_to_num(abs(np.moveaxis(rfpHs, 0, -1) - Hs) ** 2))
 
 
+# main function. gives poles of FRF which correspond to modes.
 def rfp_poles(omega, Hs, m, n):
     omegaMax = np.max(omega)
     _, B, _ = rfp(omega, Hs, m, n)
@@ -95,6 +103,7 @@ def rfp_poles(omega, Hs, m, n):
     return poles
 
 
+# WIP. attempt at extracting amplitudes algebraically
 def rfp_shapes(omega, Hs, m, n):
     omegaMax = np.max(omega)
     As, B, _ = rfp(omega, Hs, m, n)
