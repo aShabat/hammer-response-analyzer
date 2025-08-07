@@ -48,7 +48,11 @@ responses = np.delete(responses, reference_channel_index, 1)
 
 # Apply windows???
 
-Hs = np.fft.fft(responses) / np.fft.fft(references)[:, np.newaxis]
+Hs = (
+    np.arange(0, df * references.shape[-1], df)
+    * np.fft.fft(responses)
+    / np.max(np.fft.fft(references)[:, np.newaxis], 0)
+)
 borders = [
     30,
     500,
