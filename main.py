@@ -4,6 +4,7 @@ import numpy as np
 
 from RFP import rfp_poles
 
+########################################################################
 # Parameters (better add way for user to set them)
 responses_dir = os.path.join(os.path.dirname(__file__), "RESPONSES")
 parameters_dir = os.path.dirname(__file__)
@@ -14,6 +15,7 @@ reference_acceleration = (
 reference_channel = 2
 sampling_freq = 100000
 sampling_time = 0.1
+########################################################################
 
 df = 1 / sampling_time
 response_length = int(sampling_time * sampling_freq)
